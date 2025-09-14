@@ -1,0 +1,1 @@
+Thsi tool grabs data from the CSV and pushes it over a default image creating a new image that staff can use as an email footer. Next steps will be to tie it to a web front end so that staff can generate their own.
