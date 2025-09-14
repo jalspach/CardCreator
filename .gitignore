@@ -1,0 +1,4 @@
+secrets.txt
+*.log
+*.csv
+*_email_signature.png
