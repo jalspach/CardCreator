@@ -150,7 +150,22 @@ func GenerateCard(bgImagePath, regularFontPath, boldFontPath string, cardData Bu
 	y += int(companyFontSize) + 0
 	drawText(img, otherFace, fmt.Sprintf("%s", cardData.Address), 70, y, otherTextColor)
 	y += int(otherFontSize) + 0
-	drawText(img, otherFace, fmt.Sprintf("%s", cardData.PhoneNumber), 70, y, otherTextColor)
+
+	// Format the phone number before drawing it.
+	formattedPhone := cardData.PhoneNumber
+	// Remove all non-digit characters from the phone number
+	digitsOnly := strings.Map(func(r rune) rune {
+		if r >= '0' && r <= '9' {
+			return r
+		}
+		return -1
+	}, cardData.PhoneNumber)
+
+	if len(digitsOnly) == 10 {
+		formattedPhone = fmt.Sprintf("(%s) %s-%s", digitsOnly[0:3], digitsOnly[3:6], digitsOnly[6:10])
+	}
+
+	drawText(img, otherFace, fmt.Sprintf("%s", formattedPhone), 70, y, otherTextColor)
 	y += int(otherFontSize) + 0
 	drawText(img, otherFace, fmt.Sprintf("%s", cardData.Email), 70, y, otherTextColor)
 

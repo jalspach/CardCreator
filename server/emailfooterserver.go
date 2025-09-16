@@ -29,8 +29,8 @@ type BusinessCard struct {
 	Email       string
 }
 
-// GenerateCard creates a PNG image of a business card.
-// It now takes paths to a regular font and a bold font.
+// GenerateCard creates a PNG image of a business card that we can use as an email footer.
+// It takes paths to a regular font and a bold font.
 func GenerateCard(bgImagePath, regularFontPath, boldFontPath string, cardData BusinessCard) (image.Image, error) {
 	// Open and decode the background image file.
 	bgFile, err := os.Open(bgImagePath)
