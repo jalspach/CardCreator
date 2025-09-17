@@ -86,6 +86,7 @@ func GenerateCard(bgImagePath, regularFontPath, boldFontPath, italicFontPath str
 	midFontSize := 11.5
 	otherFontSize := 10.5
 	pronounsFontSize := 9.0
+	landFontSize := 9.0
 
 	// Create font faces for the different styles.
 	nameFace, err := opentype.NewFace(boldFont, &opentype.FaceOptions{
@@ -108,6 +109,11 @@ func GenerateCard(bgImagePath, regularFontPath, boldFontPath, italicFontPath str
 
 	otherFace, err := opentype.NewFace(regularFont, &opentype.FaceOptions{
 		Size:    otherFontSize,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	})
+	landFace, err := opentype.NewFace(regularFont, &opentype.FaceOptions{
+		Size:    landFontSize,
 		DPI:     72,
 		Hinting: font.HintingFull,
 	})
@@ -178,8 +184,8 @@ func GenerateCard(bgImagePath, regularFontPath, boldFontPath, italicFontPath str
 	landAcknowledgementLines := strings.Split(cardData.LandAcknowledgementStatement, "\n")
 	for _, line := range landAcknowledgementLines {
 		if strings.TrimSpace(line) != "" { // Check for empty lines
-			drawText(img, otherFace, line, 10, y, otherTextColor)
-			y += int(otherFontSize) + 0
+			drawText(img, landFace, line, 10, y, otherTextColor)
+			y += int(landFontSize) + 0
 		}
 	}
 
