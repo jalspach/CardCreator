@@ -85,7 +85,7 @@ func GenerateCard(bgImagePath, regularFontPath, boldFontPath, italicFontPath str
 	nameFontSize := 14.0
 	midFontSize := 11.5
 	otherFontSize := 10.5
-	pronounsFontSize := 9.0
+	pronounsFontSize := 10.0
 	landFontSize := 9.0
 
 	// Create font faces for the different styles.
@@ -177,7 +177,7 @@ func GenerateCard(bgImagePath, regularFontPath, boldFontPath, italicFontPath str
 	drawText(img, otherFace, fmt.Sprintf("%s", formattedPhone), 63, y, otherTextColor)
 	y += int(otherFontSize) + 0
 	drawText(img, otherFace, fmt.Sprintf("%s", cardData.Email), 63, y, otherTextColor)
-	y += int(otherFontSize) + 45
+	y += int(otherFontSize) + 40
 
 	// Draw the land acknowledgement statement at the very bottom.
 	// Split the statement into individual lines.
