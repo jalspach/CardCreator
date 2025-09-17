@@ -19,21 +19,18 @@ import (
 
 // BusinessCard holds the data for the card.
 type BusinessCard struct {
-	Name        string
-	Pronouns    string
-	Title       string
-	Company     string
-	Department  string
-	Address     string
-	LandGrant1  string
-	LandGrant2  string
-	LandGrant3  string
-	LandGrant4  string
-	PhoneNumber string
-	Email       string
+	Name                         string
+	Pronouns                     string
+	Title                        string
+	Company                      string
+	Department                   string
+	Address                      string
+	LandAcknowledgementStatement string
+	PhoneNumber                  string
+	Email                        string
 }
 
-// GenerateCard creates a PNG image of a business card.
+// GenerateCard creates a PNG image for an email signature.
 // It now takes paths to a regular font, a bold font, and an italic font.
 func GenerateCard(bgImagePath, regularFontPath, boldFontPath, italicFontPath string, cardData BusinessCard) (image.Image, error) {
 	// Open and decode the background image file.
@@ -85,10 +82,10 @@ func GenerateCard(bgImagePath, regularFontPath, boldFontPath, italicFontPath str
 	}
 
 	// Set up text drawing properties.
-	nameFontSize := 36.0
-	midFontSize := 28.0
-	otherFontSize := 24.0
-	pronounsFontSize := 18.0
+	nameFontSize := 14.0
+	midFontSize := 11.5
+	otherFontSize := 10.5
+	pronounsFontSize := 9.0
 
 	// Create font faces for the different styles.
 	nameFace, err := opentype.NewFace(boldFont, &opentype.FaceOptions{
@@ -99,7 +96,7 @@ func GenerateCard(bgImagePath, regularFontPath, boldFontPath, italicFontPath str
 	if err != nil {
 		return nil, fmt.Errorf("failed to create name font face: %w", err)
 	}
-	
+
 	midFace, err := opentype.NewFace(boldFont, &opentype.FaceOptions{
 		Size:    midFontSize,
 		DPI:     72,
@@ -128,36 +125,35 @@ func GenerateCard(bgImagePath, regularFontPath, boldFontPath, italicFontPath str
 	}
 
 	// Define colors for the text.
-	nameColor := color.RGBA{R: 255, G: 165, B: 0, A: 255}
-	midTextColor := color.RGBA{R: 200, G: 200, B: 200, A: 255} // A light gray
-	otherTextColor := color.RGBA{R: 255, G: 255, B: 255, A: 255}
+	nameColor := color.RGBA{R: 244, G: 123, B: 43, A: 255}       // A bright orange
+	midTextColor := color.RGBA{R: 0, G: 48, B: 71, A: 255}       // A dark blue
+	otherTextColor := color.RGBA{R: 109, G: 110, B: 113, A: 255} // A medium gray
 
 	// Draw the text dynamically.
 	// We'll use a y-coordinate variable that gets updated after each line.
-	y := 100
-	drawText(img, nameFace, cardData.Name, 50, y, nameColor)
-	y += int(nameFontSize) + 5
-
+	y := 15
+	drawText(img, nameFace, cardData.Name, 63, y, nameColor)
+	y += int(nameFontSize) + 0
+	drawText(img, midFace, fmt.Sprintf("%s", cardData.Title), 63, y, midTextColor)
+	y += int(midFontSize) + 0
 	if cardData.Pronouns != "" {
-		drawText(img, pronounsFace, cardData.Pronouns, 50, y, otherTextColor)
-		y += int(pronounsFontSize) + 5
+		drawText(img, pronounsFace, cardData.Pronouns, 63, y, otherTextColor)
+		y += int(pronounsFontSize) + 0
 	}
-	
+
 	y += 10 // Add a little more space after the name/pronouns block
 
-	drawText(img, midFace, fmt.Sprintf("Title: %s", cardData.Title), 50, y, midTextColor)
-	y += int(midFontSize) + 10
-	drawText(img, midFace, fmt.Sprintf("Company: %s", cardData.Company), 50, y, midTextColor)
-	y += int(midFontSize) + 10
+	drawText(img, midFace, fmt.Sprintf("%s", cardData.Company), 63, y, midTextColor)
+	y += int(midFontSize) + 0
 
 	if cardData.Department != "" {
-		drawText(img, midFace, fmt.Sprintf("Department: %s", cardData.Department), 50, y, midTextColor)
-		y += int(midFontSize) + 10
+		drawText(img, midFace, fmt.Sprintf("%s", cardData.Department), 63, y, midTextColor)
+		y += int(midFontSize) + 0
 	}
 
-	drawText(img, otherFace, fmt.Sprintf("Address: %s", cardData.Address), 50, y, otherTextColor)
-	y += int(otherFontSize) + 10
-	
+	drawText(img, otherFace, fmt.Sprintf("%s", cardData.Address), 63, y, otherTextColor)
+	y += int(otherFontSize) + 0
+
 	// Format the phone number before drawing it.
 	formattedPhone := cardData.PhoneNumber
 	// Remove all non-digit characters from the phone number
@@ -172,29 +168,21 @@ func GenerateCard(bgImagePath, regularFontPath, boldFontPath, italicFontPath str
 		formattedPhone = fmt.Sprintf("(%s) %s-%s", digitsOnly[0:3], digitsOnly[3:6], digitsOnly[6:10])
 	}
 
-	drawText(img, otherFace, fmt.Sprintf("Phone: %s", formattedPhone), 50, y, otherTextColor)
-	y += int(otherFontSize) + 10
-	drawText(img, otherFace, fmt.Sprintf("Email: %s", cardData.Email), 50, y, otherTextColor)
-	y += int(otherFontSize) + 10
+	drawText(img, otherFace, fmt.Sprintf("%s", formattedPhone), 63, y, otherTextColor)
+	y += int(otherFontSize) + 0
+	drawText(img, otherFace, fmt.Sprintf("%s", cardData.Email), 63, y, otherTextColor)
+	y += int(otherFontSize) + 45
 
-	// Draw the land grant statement at the very bottom.
-	if cardData.LandGrant1 != "" {
-		drawText(img, otherFace, cardData.LandGrant1, 50, y, otherTextColor)
-		y += int(otherFontSize) + 5
+	// Draw the land acknowledgement statement at the very bottom.
+	// Split the statement into individual lines.
+	landAcknowledgementLines := strings.Split(cardData.LandAcknowledgementStatement, "\n")
+	for _, line := range landAcknowledgementLines {
+		if strings.TrimSpace(line) != "" { // Check for empty lines
+			drawText(img, otherFace, line, 10, y, otherTextColor)
+			y += int(otherFontSize) + 0
+		}
 	}
-	if cardData.LandGrant2 != "" {
-		drawText(img, otherFace, cardData.LandGrant2, 50, y, otherTextColor)
-		y += int(otherFontSize) + 5
-	}
-	if cardData.LandGrant3 != "" {
-		drawText(img, otherFace, cardData.LandGrant3, 50, y, otherTextColor)
-		y += int(otherFontSize) + 5
-	}
-	if cardData.LandGrant4 != "" {
-		drawText(img, otherFace, cardData.LandGrant4, 50, y, otherTextColor)
-		y += int(otherFontSize) + 5
-	}
-	
+
 	return img, nil
 }
 
@@ -225,31 +213,28 @@ func cardHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get the business card details from the form.
 	cardData := BusinessCard{
-		Name:        r.FormValue("name"),
-		Pronouns:    r.FormValue("pronouns"),
-		Title:       r.FormValue("title"),
-		Company:     r.FormValue("company"),
-		Department:  r.FormValue("department"),
-		Address:     r.FormValue("address"),
-		LandGrant1:  r.FormValue("land_grant_1"),
-		LandGrant2:  r.FormValue("land_grant_2"),
-		LandGrant3:  r.FormValue("land_grant_3"),
-		LandGrant4:  r.FormValue("land_grant_4"),
-		PhoneNumber: r.FormValue("phone_number"),
-		Email:       r.FormValue("email"),
+		Name:                         r.FormValue("name"),
+		Pronouns:                     r.FormValue("pronouns"),
+		Title:                        r.FormValue("title"),
+		Company:                      r.FormValue("company"),
+		Department:                   r.FormValue("department"),
+		Address:                      r.FormValue("address"),
+		LandAcknowledgementStatement: r.FormValue("land_acknowledgement"),
+		PhoneNumber:                  r.FormValue("phone_number"),
+		Email:                        r.FormValue("email"),
 	}
 
 	// Set paths to the assets. **You must update these paths.**
-	bgImagePath := "./assets/background_image.png"
-	regularFontPath := "./assets/Railway-Regular.ttf"
-	boldFontPath := "./assets/Railway-Bold.ttf"
-	italicFontPath := "./assets/Railway-Italic.ttf"
+	bgImagePath := "../assets/background/EmailSignatureBackground.png"
+	regularFontPath := "../assets/fonts/Raleway-Regular.ttf"
+	boldFontPath := "../assets/fonts/Raleway-Bold.ttf"
+	italicFontPath := "../assets/fonts/Raleway-Light.ttf"
 
 	// Generate the business card image.
 	img, err := GenerateCard(bgImagePath, regularFontPath, boldFontPath, italicFontPath, cardData)
 	if err != nil {
 		log.Printf("Error generating image: %v", err)
-		http.Error(w, "Failed to generate business card image", http.StatusInternalServerError)
+		http.Error(w, "Failed to generate email signature image", http.StatusInternalServerError)
 		return
 	}
 
@@ -277,7 +262,7 @@ func main() {
 
 	// Serve the main HTML file.
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "index.html")
+		http.ServeFile(w, r, "./emailfooterserverui.html")
 	})
 
 	fmt.Println("Server listening on http://localhost:8080")
